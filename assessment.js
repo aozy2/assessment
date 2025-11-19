@@ -4,21 +4,37 @@ const assessmentButton = document.getElementById('assessment');
 const resultDivision = document.getElementById('result-area');
 const tweetDivision = document.getElementById('tweet-area');
 
-assessmentButton.onclick = () => {
-  const userName = userNameInput.value;
-  if (userName.length === 0) {
+assessmentButton.addEventListener(
+  'click',
+  function () {
+    const userName = userNameInput.value;
+    if (userName.length === 0) {
     // 名前が空の時は処理を終了する
     return;
   }
+    // 診断結果表示エリアの作成
+    resultDivision.innerText = ''; //divタグを空文字で上書きすることで、空にしている。
+    const header = document.createElement('h3'); //h3タグの作成
+    header.innerText = '診断結果'; //タグの内側のテキストを設定
+    resultDivision.appendChild(header); //divタグの子要素として追加
 
-  // 診断結果表示エリアの作成
-  resultDivision.innerText = '';
+    const paragraph = document.createElement('p');
+    const result = assessment(userName);
+    paragraph.innerText = result;
+    resultDivision.appendChild(paragraph);
+
+
+    console.log(userName);
+  }
+);
+
+ 
+
+  
+  
  
   // headerDivision の作成
-  const headerDivision = document.createElement('div');
-  headerDivision.setAttribute('class', 'card-header text-bg-primary');
-  headerDivision.innerText = '診断結果';
-
+  
   // bodyDivision の作成
   const bodyDivision = document.createElement('div');
   bodyDivision.setAttribute('class', 'card-body');
@@ -47,20 +63,23 @@ assessmentButton.onclick = () => {
   anchor.setAttribute('href', hrefValue);
   anchor.setAttribute('class', 'twitter-hashtag-button');
   anchor.setAttribute('data-text', result);
-  anchor.innerText = 'Tweet #あなたのいいところ';
+  anchor.innerText = '#あなたのいいところを投稿する。';
 
   tweetDivision.appendChild(anchor);
   
   const script = document.createElement('script');
   script.setAttribute('src', 'https://platform.twitter.com/widgets.js');
   tweetDivision.appendChild(script);
-};
 
-userNameInput.onkeydown = event => {
-  if (event.key === 'Enter') {
-    assessmentButton.onclick();
-  }
-};
+
+userNameInput.addEventListener(
+   'keydown',
+   (event) => {
+    if(event.code === 'Enter') {
+      assessmentButton.dispatchEvent(new Event('click'));
+    }
+   }
+)
 
 const answers = [
   '###userName###のいいところは声です。###userName###の特徴的な声は皆を惹きつけ、心に残ります。',
@@ -82,33 +101,62 @@ const answers = [
   '###userName###のいいところは優しさです。###userName###の優しい雰囲気や立ち振る舞いに多くの人が癒やされています。',
 ];
 
+/**
+ * 名前の文字列を渡すと診断結果を返す関数
+ * @param {string} userName ユーザの名前
+ * @return {string} 診断結果
+ */
 function assessment(userName) {
    // 全文字のコード番号を取得してそれを足し合わせる
-  let sumOfCharCode = 0;
-  for (let i = 0; i < userName.length; i++) {
-    sumOfCharCode = sumOfCharCode + userName.charCodeAt(i);
+  let sumOfCharCode = 0; //文字コードの合計を取っておく変数
+  for (let i = 0; i < userName.length; i++) { //文字数回ループ
+    sumOfCharCode = sumOfCharCode + userName.charCodeAt(i); //合計を計算
   }
 
   // 文字のコード番号の合計を回答の数で割って添字の数値を求める
   const index = sumOfCharCode % answers.length;
-  let result = answers[index];
+  let result = answers[index]; //配列から答えを取得
   result = result.replaceAll('###userName###', userName);
   return result;
 }
 
-/*console.log(assessment('太郎'));
-console.log(assessment('次郎'));
-console.log(assessment('太郎'));*/
+
+
 // テストコード
-console.assert(
+
+// テストを行う関数
+function test() {
+  console.log('診断結果の文章のテスト');
+
+  //太郎
+  console.log('太郎');
+  console.assert(
   assessment('太郎') ===
     '太郎のいいところは決断力です。太郎がする決断にいつも助けられる人がいます。',
   '診断結果の文言の特定の部分を名前に置き換える処理が正しくありません。'
+);
+  //次郎
+  console.log('次郎');
+  console.assert(
+  assessment('次郎') ===
+    '次郎のいいところは自制心です。やばいと思ったときにしっかりと衝動を抑えられる次郎が皆から評価されています。',
+  '診断結果の文言の特定の部分を名前に置き換える処理が正しくありません。'
+);
+
+  //花子
+  console.log('花子');
+  console.assert(
+    assessment('花子') ===
+      '花子のいいところはまなざしです。花子に見つめられた人は、気になって仕方がないでしょう。',
+    '診断結果の文言の特定の部分を名前に置き換える処理が正しくありません。'
 );
 
 console.assert(
   assessment('太郎') === assessment('太郎'),
   '入力が同じ名前なら同じ診断結果を出力する処理が正しくありません。'
 );
-console.log(assessment('太郎'));
-console.log(assessment('太郎'));
+
+  console.log('診断結果の文章のテスト終了');
+}
+
+test();
